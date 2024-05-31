@@ -51,6 +51,19 @@ DISK_TOTAL_SYSTEM=$(df -h | grep '^/dev/' | awk '{total+=$2} END {print total}')
 SERVER_IP=$(hostname -I | awk '{print $1}')
 SERVER_NAME=$(hostname)
 
+# Pobranie czasu działania kontenera w sekundach i w formacie ludzkim
+STARTED_AT=$(docker inspect --format='{{.State.StartedAt}}' $CONTAINER_NAME)
+CURRENT_TIME=$(date +%s)
+CONTAINER_UPTIME_SECONDS=$((CURRENT_TIME - $(date -d "$STARTED_AT" +%s)))
+CONTAINER_UPTIME_HUMAN=$(date -u -d @$CONTAINER_UPTIME_SECONDS +"%jd %Hh %Mm %Ss")
+
+# Pobranie czasu działania serwera w sekundach i w formacie ludzkim
+SERVER_UPTIME_SECONDS=$(date +%s -d "$(uptime -s)")
+SERVER_UPTIME_HUMAN=$(uptime -p)
+
+# Pobranie listy plików z katalogu /root/update_g4f/har_and_cookies/
+FILES=$(ls /root/update_g4f/har_and_cookies/ 2>/dev/null)
+
 # Tworzenie JSON z wynikami
 JSON_RESULT=$(jq -n \
     --arg container_name "$CONTAINER_NAME" \
@@ -65,12 +78,17 @@ JSON_RESULT=$(jq -n \
     --arg memory_total_system "$MEMORY_TOTAL_SYSTEM" \
     --arg swap_usage_system "$SWAP_USAGE_SYSTEM%" \
     --arg swap_used_system "$SWAP_USED_SYSTEM" \
-    --arg swap_total_system "$SWAP_TOTAL_SYSTEM" \
+    --arg swap_total_system "$SWAP_TOTAL_SYSTEM MiB" \
     --arg disk_usage_system "$(printf "%.2f" $DISK_USAGE_SYSTEM)%" \
     --arg disk_used_system "$DISK_USED_SYSTEM GiB" \
     --arg disk_total_system "$DISK_TOTAL_SYSTEM GiB" \
     --arg server_name "$SERVER_NAME" \
     --arg server_ip "$SERVER_IP" \
+    --arg files "$FILES" \
+    --arg container_uptime_human "$CONTAINER_UPTIME_HUMAN" \
+    --arg container_uptime_seconds "$CONTAINER_UPTIME_SECONDS" \
+    --arg server_uptime_human "$SERVER_UPTIME_HUMAN" \
+    --arg server_uptime_seconds "$SERVER_UPTIME_SECONDS" \
     '{
         container: {
             name: $container_name,
@@ -78,7 +96,9 @@ JSON_RESULT=$(jq -n \
             cpu_usage: $cpu_usage_container,
             memory_usage: $memory_usage_container,
             memory_limit: $memory_limit_container,
-            memory_percent: $memory_percent_container
+            memory_percent: $memory_percent_container,
+            uptime_human: $container_uptime_human,
+            uptime_seconds: $container_uptime_seconds
         },
         system: {
             cpu_usage: $cpu_usage_system,
@@ -96,14 +116,17 @@ JSON_RESULT=$(jq -n \
                 usage: $disk_usage_system,
                 used: $disk_used_system,
                 total: $disk_total_system
-            }
+            },
+            uptime_human: $server_uptime_human,
+            uptime_seconds: $server_uptime_seconds
         },
         server: {
             name: $server_name,
             ip: $server_ip
-        }
+        },
+        files: ($files | split("\n") | map(select(length > 0)))
     }'
 )
 
-# Wyświetlenie JSON
+# Wyświetlenie
 echo "$JSON_RESULT"
