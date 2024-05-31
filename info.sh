@@ -78,7 +78,7 @@ JSON_RESULT=$(jq -n \
     --arg memory_total_system "$MEMORY_TOTAL_SYSTEM" \
     --arg swap_usage_system "$SWAP_USAGE_SYSTEM%" \
     --arg swap_used_system "$SWAP_USED_SYSTEM" \
-    --arg swap_total_system "$SWAP_TOTAL_SYSTEM MiB" \
+    --arg swap_total_system "$SWAP_TOTAL_SYSTEM" \
     --arg disk_usage_system "$(printf "%.2f" $DISK_USAGE_SYSTEM)%" \
     --arg disk_used_system "$DISK_USED_SYSTEM GiB" \
     --arg disk_total_system "$DISK_TOTAL_SYSTEM GiB" \
