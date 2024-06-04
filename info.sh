@@ -19,7 +19,7 @@ MEMORY_LIMIT_CONTAINER=$(free -m | awk 'NR==2{printf "%.0f MiB", $2}')
 CPU_USAGE_CONTAINER=${CPU_USAGE_CONTAINER//%}
 
 # Konwersja danych pamięci na bajty
-# MEMORY_USAGE_CONTAINER=$(echo $MEMORY_USAGE_CONTAINER | awk '{gsub(/[^0-9.]+/, "", $0); printf "%.2f\n", $0}')
+#MEMORY_USAGE_CONTAINER=$(echo $MEMORY_USAGE_CONTAINER | awk '{gsub(/[^0-9.]+/, "", $0); printf "%.2f\n", $0}')
 MEMORY_USAGE_CONTAINER=$(echo $MEMORY_USAGE_CONTAINER | awk '{print $1}')
 #MEMORY_USAGE_CONTAINER=$(echo $MEMORY_USAGE_CONTAINER | sed 's/MiB//')
 #MEMORY_USAGE_CONTAINER=$(echo $MEMORY_USAGE_CONTAINER | awk '{print int($1)}')
