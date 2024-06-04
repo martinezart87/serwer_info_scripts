@@ -19,7 +19,10 @@ MEMORY_LIMIT_CONTAINER=$(free -m | awk 'NR==2{printf "%.0f MiB", $2}')
 CPU_USAGE_CONTAINER=${CPU_USAGE_CONTAINER//%}
 
 # Konwersja danych pamięci na bajty
-MEMORY_USAGE_CONTAINER=$(echo $MEMORY_USAGE_CONTAINER | awk '{gsub(/[^0-9.]+/, "", $0); printf "%.0f\n", $0}')
+# MEMORY_USAGE_CONTAINER=$(echo $MEMORY_USAGE_CONTAINER | awk '{gsub(/[^0-9.]+/, "", $0); printf "%.2f\n", $0}')
+MEMORY_USAGE_CONTAINER=$(echo $MEMORY_USAGE_CONTAINER | awk '{print $1}')
+#MEMORY_USAGE_CONTAINER=$(echo $MEMORY_USAGE_CONTAINER | sed 's/MiB//')
+#MEMORY_USAGE_CONTAINER=$(echo $MEMORY_USAGE_CONTAINER | awk '{print int($1)}')
 
 # Pobranie adresu IP kontenera
 CONTAINER_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME)
@@ -70,7 +73,7 @@ JSON_RESULT=$(jq -n \
     --arg container_name "$CONTAINER_NAME" \
     --arg container_ip "$CONTAINER_IP" \
     --arg cpu_usage_container "$CPU_USAGE_CONTAINER%" \
-    --arg memory_usage_container "$MEMORY_USAGE_CONTAINER MiB" \
+    --arg memory_usage_container "$MEMORY_USAGE_CONTAINER" \
     --arg memory_limit_container "$MEMORY_LIMIT_CONTAINER" \
     --arg memory_percent_container "$MEMORY_PERCENT_CONTAINER" \
     --arg cpu_usage_system "$CPU_USAGE_SYSTEM%" \
